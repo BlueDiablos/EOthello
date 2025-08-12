@@ -41,4 +41,5 @@ visit: <http://localhost:5173/>
 - Where the players pieces are initially placed on the board (this can be changed in code - see 'startingIndices')
 - The overall board size.
 - Grid color could also easily be added to the settings type and replace the hard coded color on Board.tsx
+- We could also extend with relatively low effort, what shape the pieces should be. At the moment its just a SVG circle but we could add "Player piece" to the settings type and select which piece gets rendered by matching the settings player piece to the players number.
 - Something that wasn't implemented that I was thinking of would be to extend the player type or add new types that allow us to set/create new rules for the game. IE Player 1 has a "handicap" and gets an extra move somewhere in the game, or at all times, and we could easily add logic to the function switchTurns() that could account for this.
