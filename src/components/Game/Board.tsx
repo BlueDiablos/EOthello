@@ -9,7 +9,6 @@ import Modal from "../App/Modal.tsx";
 function Board(settings: GameSettings) {
   const rows = settings.rows;
   const cols = settings.columns;
-
   useEffect(() => {
     if (isGameOver() || isInitialStart()) {
       return;
@@ -79,16 +78,28 @@ function Board(settings: GameSettings) {
       opponent?.pieceCount === opponent?.startingIndices.length
     );
   }
-  //game is over once the total collective piece count is that of the total available cells on the grid
+  //game is over once the total collective piece count is that of the total available cells on the grid or both players no longer have moves
   function isGameOver() {
-    return currentPlayer!.pieceCount + opponent!.pieceCount == rows * cols;
+    if (currentPlayer!.pieceCount + opponent!.pieceCount == rows * cols) {
+      return true;
+    }
+
+    if (
+      !isInitialStart() &&
+      !opponent?.hasValidMove &&
+      !currentPlayer?.hasValidMove
+    ) {
+      return true;
+    }
   }
 
-  function getWinningPlayer(): Player {
+  function getWinningMessage(): string {
     if (currentPlayer!.pieceCount > opponent!.pieceCount) {
-      return currentPlayer!;
+      return currentPlayer!.colorPiece + " Wins!";
+    } else if (opponent!.pieceCount > currentPlayer!.pieceCount) {
+      return opponent!.colorPiece + " Wins!";
     } else {
-      return opponent!;
+      return "Draw!";
     }
   }
 
@@ -267,7 +278,7 @@ function Board(settings: GameSettings) {
         <Modal
           isOpen={true}
           onClose={resetGame}
-          children={<h1>{getWinningPlayer().colorPiece} Wins!</h1>}
+          children={<h1>{getWinningMessage()}</h1>}
         ></Modal>
       )}
 
