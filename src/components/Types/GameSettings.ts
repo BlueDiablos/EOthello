@@ -4,4 +4,5 @@ export interface GameSettings {
   players: [Player, Player];
   rows: number;
   columns: number;
+  playStartingPieces: number;
 }

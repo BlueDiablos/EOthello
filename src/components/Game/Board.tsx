@@ -74,22 +74,14 @@ function Board(settings: GameSettings) {
 
   function isInitialStart() {
     return (
-      currentPlayer?.pieceCount === currentPlayer?.startingIndices.length &&
-      opponent?.pieceCount === opponent?.startingIndices.length
+      currentPlayer?.pieceCount === settings.playStartingPieces &&
+      opponent?.pieceCount === settings.playStartingPieces
     );
   }
 
   //game is over once the total collective piece count is that of the total available cells on the grid or both players no longer have moves
   function isGameOver() {
     if (currentPlayer!.pieceCount + opponent!.pieceCount === rows * cols) {
-      return true;
-    }
-
-    if (
-      !isInitialStart() &&
-      !opponent?.hasValidMove &&
-      !currentPlayer?.hasValidMove
-    ) {
       return true;
     }
   }
@@ -258,11 +250,7 @@ function Board(settings: GameSettings) {
 
   function resetGame(): boolean {
     for (const player of settings.players) {
-      player.pieceCount = player.startingIndices.length;
-
-      if (player.goesFirst) {
-        setCurrentPlayer(player);
-      }
+      player.pieceCount = settings.playStartingPieces;
     }
 
     const grid = createInitialGameBoard();

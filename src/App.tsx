@@ -41,6 +41,7 @@ function App() {
       ],
       rows: 8,
       columns: 8,
+      playStartingPieces: 2,
     };
   });
 
@@ -51,6 +52,7 @@ function App() {
         players={gameSettings.players}
         rows={gameSettings.rows}
         columns={gameSettings.columns}
+        playStartingPieces={gameSettings.playStartingPieces}
       />
     </>
   );
