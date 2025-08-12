@@ -1,6 +1,6 @@
 const BoardPieceColor = {
-  WHITE: "white",
-  BLACK: "black",
+  WHITE: "White",
+  BLACK: "Black",
 } as const;
 
 export default BoardPieceColor;

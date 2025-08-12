@@ -1,5 +1,5 @@
 export interface GridElement {
-  HasElement: boolean;
-  CanBeSelected: boolean;
-  Color?: string | null;
+  hasElement: boolean;
+  canBeSelected: boolean;
+  color?: string | null;
 }
