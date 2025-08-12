@@ -40,7 +40,6 @@ function GameStats(stats: Stats) {
               {player.pieceCount}
             </div>
           </div>
-
           {player.hasTurn && (
             <div
               style={{
@@ -54,6 +53,24 @@ function GameStats(stats: Stats) {
               }}
             >
               {player.colorPiece}'s turn
+            </div>
+          )}
+
+          {player.isWinner && (
+            <div>
+              <div
+                style={{
+                  marginTop: "10px",
+                  background: "#3498db",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  textAlign: "center",
+                  fontWeight: "700",
+                  fontSize: "0.9em",
+                }}
+              >
+                {player.colorPiece} Wins!
+              </div>
             </div>
           )}
         </div>

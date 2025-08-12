@@ -1,13 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import GameStats from "./GameStats";
 import type { GridElement } from "../Types/GridElement";
 import type { GameSettings } from "../Types/GameSettings";
 import SvgCircle from "../App/SvgCircle.tsx";
 import type { Player } from "../Types/Player";
+import Modal from "../App/Modal.tsx";
 
 function Board(settings: GameSettings) {
   const rows = settings.rows;
   const cols = settings.columns;
+
+  useEffect(() => {
+    if (isGameOver() || isInitialStart()) {
+      return;
+    }
+
+    //if the game is not over but the current player has no possible moves, switch the turn
+    if (!currentPlayer?.hasValidMove) {
+      switchTurn();
+    } else {
+      //since this happens after we render we want to reset the currentPlayers valid move state
+      //where it will be reevaluated when we re-render
+      currentPlayer.hasValidMove = false;
+    }
+  });
 
   const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>(() => {
     return settings.players.find((player) => player.goesFirst);
@@ -17,20 +33,31 @@ function Board(settings: GameSettings) {
     return settings.players.find((player) => !player.goesFirst);
   });
 
-  const [gridData, setGridData] = useState<GridElement[][]>(() => {
+  //populate the grid
+  const [gameBoard, setGameBoard] = useState<GridElement[][]>(() => {
+    const grid = createInitialGameBoard();
+    setInitialGamePieces(grid);
+
+    return grid;
+  });
+
+  function createInitialGameBoard(): GridElement[][] {
     const initialGrid: GridElement[][] = [];
 
     for (let i = 0; i < rows; i++) {
       initialGrid[i] = [];
       for (let j = 0; j < cols; j++) {
-        initialGrid[i][j] = { hasElement: false, canBeSelected: false };
+        initialGrid[i][j] = {
+          hasElement: false,
+          canBeSelected: false,
+          posX: i,
+          posY: j,
+        };
       }
     }
 
-    setInitialGamePieces(initialGrid);
-
     return initialGrid;
-  });
+  }
 
   function setInitialGamePieces(initialGrid: GridElement[][]) {
     for (const player of settings.players) {
@@ -39,12 +66,33 @@ function Board(settings: GameSettings) {
           hasElement: true,
           canBeSelected: false,
           color: player.colorPiece,
+          posX: startingPositions.posX,
+          posY: startingPositions.posY,
         };
       }
     }
   }
 
-  //a 2d array of numbers that define the direction on the grid we need to navigate
+  function isInitialStart() {
+    return (
+      currentPlayer?.pieceCount === currentPlayer?.startingIndices.length &&
+      opponent?.pieceCount === opponent?.startingIndices.length
+    );
+  }
+  //game is over once the total collective piece count is that of the total available cells on the grid
+  function isGameOver() {
+    return currentPlayer!.pieceCount + opponent!.pieceCount == rows * cols;
+  }
+
+  function getWinningPlayer(): Player {
+    if (currentPlayer!.pieceCount > opponent!.pieceCount) {
+      return currentPlayer!;
+    } else {
+      return opponent!;
+    }
+  }
+
+  //a 2d array of numbers that define the direction on the grid we need to navigate (up/down/left/right on y and x axis)
   function getDirections(): number[][] {
     return [
       [-1, -1],
@@ -58,11 +106,12 @@ function Board(settings: GameSettings) {
     ];
   }
 
+  //starts at the given row and column on the grid and moves in all directions until a valid cell is found.
   function isGridPositionAValidMove(
     currentRow: number,
     currentCol: number,
   ): boolean {
-    const currentElement = gridData[currentRow][currentCol];
+    const currentElement = gameBoard[currentRow][currentCol];
     if (currentElement.hasElement) {
       return false;
     }
@@ -71,16 +120,17 @@ function Board(settings: GameSettings) {
       let x = currentRow + directionX;
       let y = currentCol + directionY;
       let foundOpponentColor = false;
-      const gridLength = gridData.length;
+      const gridLength = gameBoard.length;
 
       while (x >= 0 && x < gridLength && y >= 0 && y < gridLength) {
-        const cell = gridData[x][y];
+        const cell = gameBoard[x][y];
         if (cell.color === opponent?.colorPiece) {
           foundOpponentColor = true;
         } else if (
           cell.color === currentPlayer?.colorPiece &&
           foundOpponentColor
         ) {
+          currentPlayer!.hasValidMove = true;
           return true;
         } else {
           break;
@@ -94,14 +144,15 @@ function Board(settings: GameSettings) {
     return false;
   }
 
+  //early exit condition if the cell has no piece on it or is of the same color of the current player
   function isDirectionOnGridValid(posX: number, posY: number): boolean {
     if (
       posX >= 0 &&
-      posX < gridData.length &&
+      posX < gameBoard.length &&
       posY >= 0 &&
-      posY < gridData.length
+      posY < gameBoard.length
     ) {
-      const currentCell = gridData[posX][posY];
+      const currentCell = gameBoard[posX][posY];
 
       if (currentCell.color === null || currentCell.color === undefined) {
         return false;
@@ -119,7 +170,7 @@ function Board(settings: GameSettings) {
     for (const [directionX, directionY] of getDirections()) {
       let x = currentRow + directionX;
       let y = currentCol + directionY;
-      const gridLength = gridData.length;
+      const gridLength = gameBoard.length;
 
       if (!isDirectionOnGridValid(x, y)) {
         continue;
@@ -136,7 +187,7 @@ function Board(settings: GameSettings) {
         const cellsToFlip = [];
 
         while (x >= 0 && x < gridLength && y >= 0 && y < gridLength) {
-          const cell = gridData[x][y];
+          const cell = gameBoard[x][y];
 
           if (cell.color === undefined || cell.color === null) {
             return [];
@@ -162,9 +213,7 @@ function Board(settings: GameSettings) {
     }
   }
 
-  function handleUpdate(row: number, column: number) {
-    const cell = gridData[row][column];
-
+  function handlePlayerSelect(cell: GridElement) {
     //the cell might have once been available for selection, but now contains an element and should be skipped
     if (cell.hasElement) {
       return;
@@ -176,15 +225,15 @@ function Board(settings: GameSettings) {
       currentPlayer!.pieceCount++;
 
       //search fnd flip the elements on the grid that should be flipped to the current players color
-      flipOpponentElements(row, column);
+      flipOpponentElements(cell.posX, cell.posY);
 
       //update grid elements and rerender
-      setGridData(gridData);
-      switchPlayers();
+      setGameBoard(gameBoard);
+      switchTurn();
     }
   }
 
-  function switchPlayers() {
+  function switchTurn() {
     const newCurrentPlayer = opponent;
     const newOpponent = currentPlayer;
 
@@ -195,10 +244,34 @@ function Board(settings: GameSettings) {
     setCurrentPlayer(newCurrentPlayer);
   }
 
+  function resetGame(): boolean {
+    for (const player of settings.players) {
+      player.pieceCount = player.startingIndices.length;
+
+      if (player.goesFirst) {
+        setCurrentPlayer(player);
+      }
+    }
+
+    const grid = createInitialGameBoard();
+    setInitialGamePieces(grid);
+    setGameBoard(grid);
+    return true;
+  }
+
   return (
     <div>
       <GameStats players={settings.players} />
-      {gridData.map((row, rowIndex) => (
+
+      {isGameOver() && (
+        <Modal
+          isOpen={true}
+          onClose={resetGame}
+          children={<h1>{getWinningPlayer().colorPiece} Wins!</h1>}
+        ></Modal>
+      )}
+
+      {gameBoard.map((row, rowIndex) => (
         <div key={rowIndex} style={{ display: "flex" }}>
           {row.map((cell, colIndex) => (
             <div
@@ -214,7 +287,9 @@ function Board(settings: GameSettings) {
               <div
                 key={`cell-element-${rowIndex}-${colIndex}`}
                 style={{ width: 45, height: 45, padding: "-10px" }}
-                onClick={() => handleUpdate(rowIndex, colIndex)}
+                onClick={() =>
+                  handlePlayerSelect(gameBoard[rowIndex][colIndex])
+                }
               >
                 {cell.hasElement ? SvgCircle(cell.color) : <></>}
 

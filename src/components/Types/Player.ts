@@ -11,4 +11,6 @@ export interface Player {
   hasTurn: boolean;
   startingIndices: GridPosition[];
   isWinner: boolean;
+  hasValidMove: boolean;
+  isBot: false;
 }

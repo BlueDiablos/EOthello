@@ -1,7 +1,3 @@
-type SvgProps = {
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-};
-
 function SvgCircle(fill: string) {
   return (
     <svg width="100" height="100">

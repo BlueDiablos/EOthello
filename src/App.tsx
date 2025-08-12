@@ -4,7 +4,6 @@ import Board from "./components/Game/Board";
 import Header from "./components/App/Header";
 import BoardPieceColor from "./components/Types/BoardPieceColor";
 import type { GameSettings } from "./components/Types/GameSettings";
-import Settings from "./components/Settings/Settings";
 
 function App() {
   //default game settings - to be expanded with the setting component for user driven game settings
@@ -17,7 +16,9 @@ function App() {
           goesFirst: true,
           hasTurn: true,
           isWinner: false,
+          hasValidMove: true,
           pieceCount: 2,
+          isBot: false,
           startingIndices: [
             { posX: 3, posY: 4 },
             { posX: 4, posY: 3 },
@@ -28,8 +29,10 @@ function App() {
           colorPiece: BoardPieceColor.WHITE,
           goesFirst: false,
           hasTurn: false,
+          hasValidMove: true,
           isWinner: false,
           pieceCount: 2,
+          isBot: false,
           startingIndices: [
             { posX: 3, posY: 3 },
             { posX: 4, posY: 4 },
