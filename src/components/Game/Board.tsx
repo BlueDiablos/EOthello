@@ -78,9 +78,10 @@ function Board(settings: GameSettings) {
       opponent?.pieceCount === opponent?.startingIndices.length
     );
   }
+
   //game is over once the total collective piece count is that of the total available cells on the grid or both players no longer have moves
   function isGameOver() {
-    if (currentPlayer!.pieceCount + opponent!.pieceCount == rows * cols) {
+    if (currentPlayer!.pieceCount + opponent!.pieceCount === rows * cols) {
       return true;
     }
 
