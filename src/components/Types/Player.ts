@@ -4,7 +4,7 @@ interface GridPosition {
 }
 
 export interface Player {
-  number: number;
+  id: number;
   colorPiece: string;
   goesFirst: boolean;
   pieceCount: number;

@@ -11,7 +11,7 @@ function App() {
     return {
       players: [
         {
-          number: 1,
+          id: 1,
           colorPiece: BoardPieceColor.BLACK,
           goesFirst: true,
           hasTurn: true,
@@ -25,7 +25,7 @@ function App() {
           ],
         },
         {
-          number: 2,
+          id: 2,
           colorPiece: BoardPieceColor.WHITE,
           goesFirst: false,
           hasTurn: false,

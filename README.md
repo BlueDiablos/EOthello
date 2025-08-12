@@ -7,8 +7,6 @@ npm install
 npm run
 ```
 
-visit: <http://localhost:5173/>
-
 # How To Play
 
 - Othello is a strategy board game for two players (Black and White), played on an 8 by 8 board. The game traditionally begins with four discs placed in the middle of the board. Black moves first.
@@ -32,6 +30,8 @@ visit: <http://localhost:5173/>
 - All cells will have a clickable event, during this event have early exit conditions for cells that have elements or cells that are not valid selections at the moment
 - If the cell is valid, starting at the given row and column search the grid in each direction for pieces that should be flipped
 - Ensure there are good early exit conditions to avoid wasting compute
+- have some kind of event/hook (useEffect) to check for game ending/winning conditions when a rerender is triggered
+- display the winner and allow the next user action to reset the board
 
 ### Some Ideas
 
